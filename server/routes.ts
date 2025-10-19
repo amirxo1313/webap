@@ -2,8 +2,13 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import axios from "axios";
 
-const ONE_API_TOKEN = "752295:68ef56c8bd6eb";
+const ONE_API_TOKEN = process.env.ONE_API_TOKEN;
 const RADIO_JAVAN_BASE_URL = "https://api.one-api.ir/radiojavan/v1";
+
+if (!ONE_API_TOKEN) {
+  console.error("ERROR: ONE_API_TOKEN environment variable is not set!");
+  process.exit(1);
+}
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Middleware for CORS
