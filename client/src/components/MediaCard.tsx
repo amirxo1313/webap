@@ -13,6 +13,12 @@ export function MediaCard({ item, onClick }: MediaCardProps) {
 
   const handlePlay = (e: React.MouseEvent) => {
     e.stopPropagation();
+    
+    // Only set media if there's a valid playback link
+    if (!item.link && !item.hq_link && !item.hls_link) {
+      return;
+    }
+    
     setCurrentMedia({
       id: item.id,
       title: item.title,
@@ -26,6 +32,9 @@ export function MediaCard({ item, onClick }: MediaCardProps) {
       duration: item.duration,
     });
   };
+
+  // Check if item has playable media
+  const hasPlayableMedia = !!(item.link || item.hq_link || item.hls_link);
 
   return (
     <Card
@@ -47,15 +56,17 @@ export function MediaCard({ item, onClick }: MediaCardProps) {
           </div>
         )}
         
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <button
-            onClick={handlePlay}
-            className="absolute bottom-4 right-4 w-12 h-12 rounded-full bg-primary hover:bg-primary/90 flex items-center justify-center transition-all transform translate-y-2 group-hover:translate-y-0 shadow-neon-purple"
-            data-testid={`button-play-${item.id}`}
-          >
-            <Play className="w-5 h-5 text-primary-foreground fill-current ml-0.5" />
-          </button>
-        </div>
+        {hasPlayableMedia && (
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <button
+              onClick={handlePlay}
+              className="absolute bottom-4 right-4 w-12 h-12 rounded-full bg-primary hover:bg-primary/90 flex items-center justify-center transition-all transform translate-y-2 group-hover:translate-y-0 shadow-neon-purple"
+              data-testid={`button-play-${item.id}`}
+            >
+              <Play className="w-5 h-5 text-primary-foreground fill-current ml-0.5" />
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="p-4">
