@@ -1,0 +1,730 @@
+یک وب اپ طراحی کن بنام Behimelobot و میخواهم از طریق api کاربر بتواند موزیک ، ویدیو ، پادکست را سرچ کند و بتواند از همه قابلیت های وبسرویس که در زیر هست استفاده کنه و همچنین حتما قابلیت پخش آنلاین موزیک ، ویدیو و پادکست داشته باشه و همچنین قابلیت دانلود و همه این ها در وب اپ اتفاق بیوفته و کاربر در وب اپ همه این قابلیت ها را استفاده کند و اصلا نخواهد از وب اپ خارج شود ، رنگ وب اپ مشکی با رگه های بنفش ، ریسپانسیو باشد ، بسیار خلاقانه و حرفه ای باشد ، در زیر صفحات بنویس  product by amirxo 2025 
+در ایران api رادیو جوان فیلتر هست باید در vps یک vpn درست کنی که api ها از vpn بگذره و کاربری نیازی به VPN نداشته باشه 
+توکن من سالم هست تست شده من توکن خودم رو میفرستم 
+752295:68ef56c8bd6eb  
+
+و مستندات 
+
+پنل کاربری
+راهنمای استفاده
+کد های وضعیت
+مستندات وان سرویس
+به صفحه مستندات وان سرویس خوش آمدید!
+
+با ایجاد تنها یک حساب کاربری در پلتفرم وان سرویس به دنیایی از وبسرویس های کاربردی و متنوع دسترسی خواهید داشت. جهت ثبت نام و یا ورود به پنل کاربری وان سرویس اینجا را کلیک کنید.
+
+کلید های دسترسی
+جهت استفاده از وبسرویس های وان سرویس نیاز به کلید دسترسی API دارید، این کلید در وان سرویس اصطلاحا توکن (Token) یا رمزینه نامیده میشود. به هنگام ثبت نام در وان سرویس، یک رمزینه اختصاصی برای شما ایجاد شده و از طریق ایمیل خدمت شما ارسال میشود.
+
+رمزینه حساب شما باید در نزد شما خصوصی باقی بماند، رمزینه حساب شما از بخش مدیریت رمزینه یا توکن در پنل کاربری شما قابل تغییر یا بازیابی است.
+
+نحوه استفاده
+در تمامی درخواست های ارسالی، رمزینه فعال شما باید از طریق هدر (header) one-api-token تعیین و ارسال شود، درخواست های بدون رمزینه معتبر پردازش نمیشوند!
+
+تمامی وبسرویس ها در متد های استاندارد HTTP نظیر GET و POST طبق مستندات ارائه شده قابل استفاده هستند. توجه داشته باشید که پارامتر های درخواستی در متد GET اغلب بصورت query string و در متد POST از طریق بدنه درخواست (request body) دریافت میشوند.
+
+راهنمای مستندات
+تمامی وبسرویس ها در متد های استاندارد HTTP نظیر GET و POST طبق مستندات ارائه شده قابل استفاده هستند. توجه داشته باشید که پارامتر های درخواستی در متد GET اغلب بصورت query string و در متد POST از طریق بدنه درخواست (request body) دریافت میشوند.
+
+جهت اجرا و تست وبسرویس ها در همین صفحه میتوانید از طریق گزینه Authorize رمزینه حساب خود را ثبت کنید، با ثبت رمزینه در این قسمت در تمامی درخواست های آتی شما از طریق این صفحه، رمزینه بصورت خودکار در هدر درخواست قرار خواهد گرفت.
+
+گاها ممکن است برای تنظیم بار ترافیکی یک وبسرویس، چندین آدرس و سرور مختلف برای یک وبسرویس تعریف شود، لیست سرور ها از طریق قسمت Servers قابل دسترسی و انتخاب است. با تغییر سرور، درخواست های بعدی شما از طریق این صفحه به سرور انتخاب شده هدایت خواهد شد.
+
+در راهنمای هر وبسرویس، متود (method)، مسیر (path) , پارامتر ها (parameters) های اختیاری و اجباری (*) مشخص شدند. پارامتر ها میتوانند از طریق کوئری (query)، مسیر (path) وبسرویس و یا در بدنه درخواست (body request) تنظیم شوند، در کنار هر کدام از پارامتر ها محل قرار گیری (query یا path) و نوع پارامتر (string - integer یا ...) مشخص شده است، توجه داشته باشید که پارامتر هایی که از در بدنه درخواست تنظیم میشوند حتما باید در قالب json باشند.
+
+query example:
+/api/?parameter=value
+path example:
+/api/parameter-value/
+body request example:
+{"parameter"=>"value"}
+
+شما میتوانید از طریق قسمت Try it out هر وبسرویس با تغییر دلخواه پارامتر ها و تولید درخواست و اجرای آن (execute)، وبسرویس موردنظر را تست و بررسی نمایید، خروجی وبسرویس به محض پردازش در باکس زیرین آن نمایش داده خواهد شد. همچنین کامند curl معادل درخواست تولید شده برای شما تولید میشود که این کامند را میتوانید از طریق ابزار هایی مانند curlconverter به سورس کد های معادل در زبان های برنامه نویسی موردنظرتان تبدیل نمایید.
+
+در نگارش این مستندات از استاندارد openapi استفاده شده است. درنتیجه علاوه بر این صفحه، شما میتوانید با جایگذاری لینک مستندات openapi زیر در ابزار هایی نظیر Postman، مستندات وبسرویس را درون ریزی کنید.
+
+https://docs.one-api.ir/openapi/radiojavan
+
+مستندات وبسرویس
+Radiojavan - One-Api
+ 1.0.0 
+OAS3
+https://docs.one-api.ir/openapi/radiojavan
+وبسرویس جستجو و دانلود آهنگ از رادیوجوان
+
+curl -X 'GET' \
+  'https://api.one-api.ir/radiojavan/v1/home' \
+  -H 'accept: */*' \
+  -H 'one-api-token: 752295:68ef56c8bd6eb'
+
+https://api.one-api.ir/radiojavan/v1/home
+
+{
+  "status": 200,
+  "result": {
+    "sections": [
+      {
+        "id": "playlists_header",
+        "type": "header",
+        "title": "Vibes",
+        "show_link": false
+      },
+      {
+        "id": "playlists",
+        "type": "slider_square",
+        "items": [
+          {
+            "id": "6449cdabd351",
+            "title": "Top Songs Pop",
+            "items_count": 50,
+            "created_at": "2015-06-19T00:31:12-04:00",
+            "type": "playlist",
+            "subtype": "mp3",
+            "share_link": "https://rj.app/pm/zga1Grpg",
+            "count": 50,
+            "followers": 97303,
+            "public": true,
+            "last_updated_at": "2025-10-17T13:45:28-04:00",
+            "bg_color": "#48A4BB",
+            "custom_photo": false,
+            "show_track_numbers": true,
+            "bg_colors": [
+              "#48A4BB",
+              "#48A4BB"
+            ],
+            "desc": "Arash is on top of the hottest 50!",
+            "photo": "https://assets.rjassets.com/static/playlist/1612406/aa8c4cfbc4dd601.jpg",
+            "thumbnail": "https://assets.rjassets.com/static/playlist/1612406/aa8c4cfbc4dd601-thumb.jpg",
+            "photo_player": "https://assets.rjassets.com/static/playlist/1612406/aa8c4cfbc4dd601.jpg",
+            "default_artwork": "https://assets.rjassets.com/static/playlist/1612406/6f4f2b473d63218-artwork.jpg",
+            "created_by": "By Radio Javan",
+            "created_title": "Radio Javan",
+            "owner": {
+              "display_name": "Radio Javan",
+              "photo": "https://assets.rjassets.com/static/profiles/default-rj-thumb.jpg",
+              "thumb": "https://assets.rjassets.com/static/profiles/default-rj-thumb-x.jpg"
+            },
+            "caption": "The hottest top 50 pop songs.",
+            "myplaylist": false,
+            "collab": false
+          },
+          {
+            "id": "a5d2810c7c97",
+            "title": "Shal Gardan",
+            "items_count": 45,
+            "created_at": "2024-10-01T09:50:24-04:00",
+            "type": "playlist",
+            "subtype": "mp3",
+            "share_link": "https://rj.app/pm/wmRdGn7g",
+            "count": 45,
+            "followers": 2732,
+            "public": true,
+            "last_updated_at": "2025-09-22T16:31:36-04:00",
+            "bg_color": "#9D141D",
+            "custom_photo": false,
+            "show_track_numbers": false,
+            "bg_colors": [
+              "#9D141D",
+              "#9D141D"
+            ],
+            "photo": "https://assets.rjassets.com/static/playlist/26196129/7cdde2234e164b6.jpg",
+            "thumbnail": "https://assets.rjassets.com/static/playlist/26196129/7cdde2234e164b6-thumb.jpg",
+            "photo_player": "https://assets.rjassets.com/static/playlist/26196129/7cdde2234e164b6.jpg",
+            "default_artwork": "https://assets.rjassets.com/static/playlist/26196129/cd23f20aa7ded59-artwork.jpg",
+            "created_by": "By Radio Javan",
+            "created_title": "Radio Javan",
+            "owner": {
+              "display_name": "Radio Javan",
+              "photo": "https://assets.rjassets.com/static/profiles/default-rj-thumb.jpg",
+              "thumb": "https://assets.rjassets.com/static/profiles/default-rj-thumb-x.jpg"
+            },
+            "caption": "Faramarz Aslani, Siavash Ghomayshi, Mahasti",
+            "myplaylist": false,
+            "collab": false
+          },
+          {
+            "id": "dcfbdb93b968",
+            "title": "Dance Workout",
+            "items_count": 80,
+            "created_at": "2015-06-10T03:01:44-04:00",
+            "type": "playlist",
+            "subtype": "mp3",
+            "share_link": "https://rj.app/pm/lgRLyx0j",
+            "count": 80,
+            "followers": 66962,
+            "public": true,
+            "last_updated_at": "2025-10-17T13:52:20-04:00",
+            "bg_color": "#C23B22",
+            "custom_photo": false,
+            "show_track_numbers": false,
+            "bg_colors": [
+              "#C23B22",
+              "#C23B22"
+            ],
+            "photo": "https://assets.rjassets.com/static/playlist/1594333/fe65fab96a129bf.jpg",
+            "thumbnail": "https://assets.rjassets.com/static/playlist/1594333/fe65fab96a129bf-thumb.jpg",
+            "photo_player": "https://assets.rjassets.com/static/playlist/1594333/fe65fab96a129bf.jpg",
+            "default_artwork": "https://assets.rjassets.com/static/playlist/1594333/ffc62421872b8cc-artwork.jpg",
+            "created_by": "By Radio Javan",
+            "created_title": "Radio Javan",
+            "owner": {
+              "display_name": "Radio Javan",
+              "photo": "https://assets.rjassets.com/static/profiles/default-rj-thumb.jpg",
+              "thumb": "https://assets.rjassets.com/static/profiles/default-rj-thumb-x.jpg"
+            },
+            "caption": "Donya, Satin, TM Bax, Sasy",
+            "myplaylist": false,
+            "collab": false
+          },
+          {
+            "id": "ed609896e891",
+            "title": "Non Stop Party",
+            "items_count": 20,
+            "created_at": "2017-01-24T14:31:27-05:00",
+            "type": "playlist",
+            "subtype": "mp3",
+            "share_link": "https://rj.app/pm/VgdGLx2w",
+            "count": 20,
+            "followers": 69485,
+            "public": true,
+            "last_updated_at": "2025-08-25T12:11:07-04:00",
+            "bg_color": "#cf09cf",
+            "custom_photo": false,
+            "show_track_numbers": false,
+            "bg_colors": [
+              "#cf09cf",
+              "#cf09cf"
+            ],
+            "photo": "https://assets.rjassets.com/static/playlist/3416747/1f23b85ec4a5830.jpg",
+            "thumbnail": "https://assets.rjassets.com/static/playlist/3416747/1f23b85ec4a5830-thumb.jpg",
+            "photo_player": "https://assets.rjassets.com/static/playlist/3416747/1f23b85ec4a5830.jpg",
+            "default_artwork": "https://assets.rjassets.com/static/playlist/3416747/302ff83a2bc9782-artwork.jpg",
+            "created_by": "By Radio Javan",
+            "created_title": "Radio Javan",
+            "owner": {
+              "display_name": "Radio Javan",
+              "photo": "https://assets.rjassets.com/static/profiles/default-rj-thumb.jpg",
+              "thumb": "https://assets.rjassets.com/static/profiles/default-rj-thumb-x.jpg"
+            },
+            "caption": "Talk Down, Amiaa, Sasy, Donya",
+            "myplaylist": false,
+            "collab": false
+          },
+          {
+            "id": "69a251b642fa",
+            "title": "021",
+            "items_count": 50,
+            "created_at": "2023-11-22T23:58:14-05:00",
+            "type": "playlist",
+            "subtype": "mp3",
+            "share_link": "https://rj.app/pm/jW5mq30g",
+            "count": 50,
+            "followers": 6963,
+            "public": true,
+            "last_updated_at": "2025-09-25T12:26:13-04:00",
+            "bg_color": "#68618e",
+            "custom_photo": false,
+            "show_track_numbers": false,
+            "bg_colors": [
+              "#68618e",
+              "#68618e"
+            ],
+            "photo": "https://assets.rjassets.com/static/playlist/19031478/f0c1a5733a32b17.jpg",
+            "thumbnail": "https://assets.rjassets.com/static/playlist/19031478/f0c1a5733a32b17-thumb.jpg",
+            "photo_player": "https://assets.rjassets.com/static/playlist/19031478/f0c1a5733a32b17.jpg",
+            "default_artwork": "https://assets.rjassets.com/static/playlist/19031478/bcb15c4d44604c6-artwork.jpg",
+            "created_by": "By Radio Javan",
+            "created_title": "Radio Javan",
+            "owner": {
+              "display_name": "Radio Javan",
+              "photo": "https://assets.rjassets.com/static/profiles/default-rj-thumb.jpg",
+              "thumb": "https://assets.rjassets.com/static/profiles/default-rj-thumb-x.jpg"
+            },
+            "caption": "The Don, Talk Down, Kiyarash, Sami Beigi",
+            "myplaylist": false,
+            "collab": false
+          },
+          {
+            "id": "e29c334d9896",
+            "title": "Soft Pop Hits",
+            "items_count": 89,
+            "created_at": "2020-06-14T14:30:05-04:00",
+            "type": "playlist",
+            "subtype": "mp3",
+            "share_link": "https://rj.app/pm/wkQvm5d4",
+            "count": 89,
+            "followers": 49020,
+            "public": true,
+            "last_updated_at": "2025-10-11T13:12:21-04:00",
+            "bg_color": "#621d23",
+            "custom_photo": false,
+            "show_track_numbers": false,
+            "bg_colors": [
+              "#621d23",
+              "#621d23"
+            ],
+            "photo": "https://assets.rjassets.com/static/playlist/10234811/1b4784d7294c9b0.jpg",
+            "thumbnail": "https://assets.rjassets.com/static/playlist/10234811/1b4784d7294c9b0-thumb.jpg",
+            "photo_player": "https://assets.rjassets.com/static/playlist/10234811/1b4784d7294c9b0.jpg",
+            "default_artwork": "https://assets.rjassets.com/static/playlist/10234811/876fa66a7899cce-artwork.jpg",
+            "created_by": "By Radio Javan",
+            "created_title": "Radio Javan",
+            "owner": {
+              "display_name": "Radio Javan",
+              "photo": "https://assets.rjassets.com/static/profiles/default-rj-thumb.jpg",
+              "thumb": "https://assets.rjassets.com/static/profiles/default-rj-thumb-x.jpg"
+            },
+            "caption": "Ali Yasini, Sirvan Khosravi, Shadmehr Aghili",
+            "myplaylist": false,
+            "collab": false
+          },
+          {
+            "id": "8e7fd16b0f4a",
+            "title": "Shower Mix",
+            "items_count": 40,
+            "created_at": "2023-04-01T04:51:25-04:00",
+            "type": "playlist",
+            "subtype": "mp3",
+            "share_link": "https://rj.app/pm/jpdWXlQj",
+            "count": 40,
+            "followers": 16033,
+            "public": true,
+            "last_updated_at": "2025-08-02T14:42:15-04:00",
+            "bg_color": "#8C4D2F",
+            "custom_photo": false,
+            "show_track_numbers": false,
+            "bg_colors": [
+              "#8C4D2F",
+              "#8C4D2F"
+            ],
+            "photo": "https://assets.rjassets.com/static/playlist/17251017/f2d2a74573ad3e2.jpg",
+            "thumbnail": "https://assets.rjassets.com/static/playlist/17251017/f2d2a74573ad3e2-thumb.jpg",
+            "photo_player": "https://assets.rjassets.com/static/playlist/17251017/f2d2a74573ad3e2.jpg",
+            "default_artwork": "https://assets.rjassets.com/static/playlist/17251017/b20cdaf006fff8e-artwork.jpg",
+            "created_by": "By Radio Javan",
+            "created_title": "Radio Javan",
+            "owner": {
+              "display_name": "Radio Javan",
+              "photo": "https://assets.rjassets.com/static/profiles/default-rj-thumb.jpg",
+              "thumb": "https://assets.rjassets.com/static/profiles/default-rj-thumb-x.jpg"
+            },
+            "caption": "Talk Down, Behnam Bani, 25 Band, Sami Beigi",
+            "myplaylist": false,
+            "collab": false
+          },
+          {
+            "id": "3e27e386df09",
+            "title": "Dorehami",
+            "items_count": 40,
+            "created_at": "2016-06-07T19:57:05-04:00",
+            "type": "playlist",
+            "subtype": "mp3",
+            "share_link": "https://rj.app/pm/LwB7DWng",
+            "count": 40,
+            "followers": 57149,
+            "public": true,
+            "last_updated_at": "2025-09-04T15:26:27-04:00",
+            "bg_color": "#C1B700",
+            "custom_photo": false,
+            "show_track_numbers": false,
+            "bg_colors": [
+              "#C1B700",
+              "#C1B700"
+            ],
+            "photo": "https://assets.rjassets.com/static/playlist/2388276/0ee09cd71aac48b.jpg",
+            "thumbnail": "https://assets.rjassets.com/static/playlist/2388276/0ee09cd71aac48b-thumb.jpg",
+            "photo_player": "https://assets.rjassets.com/static/playlist/2388276/0ee09cd71aac48b.jpg",
+            "default_artwork": "https://assets.rjassets.com/static/playlist/2388276/e9956d6690f761a-artwork.jpg",
+            "created_by": "By Radio Javan",
+            "created_title": "Radio Javan",
+            "owner": {
+              "display_name": "Radio Javan",
+              "photo": "https://assets.rjassets.com/static/profiles/default-rj-thumb.jpg",
+              "thumb": "https://assets.rjassets.com/static/profiles/default-rj-thumb-x.jpg"
+            },
+            "caption": "Shayan Eshraghi, Sohrab MJ, Behnam Bani",
+            "myplaylist": false,
+            "collab": false
+          },
+          {
+            "id": "8e0ef04062c3",
+            "title": "Hess",
+            "items_count": 55,
+            "created_at": "2018-06-28T21:56:49-04:00",
+            "type": "playlist",
+            "subtype": "mp3",
+            "share_link": "https://rj.app/pm/gdmWPkn4",
+            "count": 55,
+            "followers": 28425,
+            "public": true,
+            "last_updated_at": "2025-08-21T13:32:31-04:00",
+            "bg_color": "#4e2c24",
+            "custom_photo": false,
+            "show_track_numbers": false,
+            "bg_colors": [
+              "#4e2c24",
+              "#4e2c24"
+            ],
+            "photo": "https://assets.rjassets.com/static/playlist/7325347/9c2d16005228fdd.jpg",
+            "thumbnail": "https://assets.rjassets.com/static/playlist/7325347/9c2d16005228fdd-thumb.jpg",
+            "photo_player": "https://assets.rjassets.com/static/playlist/7325347/9c2d16005228fdd.jpg",
+            "default_artwork": "https://assets.rjassets.com/static/playlist/7325347/5e685621a053006-artwork.jpg",
+            "created_by": "By Radio Javan",
+            "created_title": "Radio Javan",
+            "owner": {
+              "display_name": "Radio Javan",
+              "photo": "https://assets.rjassets.com/static/profiles/default-rj-thumb.jpg",
+              "thumb": "https://assets.rjassets.com/static/profiles/default-rj-thumb-x.jpg"
+            },
+            "caption": "The Don, Shayan Eshraghi, Koorosh, Hoomaan",
+            "myplaylist": false,
+            "collab": false
+          },
+          {
+            "id": "ad2edebd8c18",
+            "title": "Noosh",
+            "items_count": 132,
+            "created_at": "2022-01-12T14:05:59-05:00",
+            "type": "playlist",
+            "subtype": "mp3",
+            "share_link": "https://rj.app/pm/g72QG65w",
+            "count": 132,
+            "followers": 10769,
+            "public": true,
+            "last_updated_at": "2025-10-13T23:57:45-04:00",
+            "bg_color": "#A1431D",
+            "custom_photo": false,
+            "show_track_numbers": false,
+            "bg_colors": [
+              "#A1431D",
+              "#A1431D"
+            ],
+            "desc": "Enjoy a relaxing meal.",
+            "photo": "https://assets.rjassets.com/static/playlist/13791116/cba458f67add61f.jpg",
+            "thumbnail": "https://assets.rjassets.com/static/playlist/13791116/cba458f67add61f-thumb.jpg",
+            "photo_player": "https://assets.rjassets.com/static/playlist/13791116/cba458f67add61f.jpg",
+            "default_artwork": "https://assets.rjassets.com/static/playlist/13791116/aa96d55129bcfe4-artwork.jpg",
+            "created_by": "By Radio Javan",
+            "created_title": "Radio Javan",
+            "owner": {
+              "display_name": "Radio Javan",
+              "photo": "https://assets.rjassets.com/static/profiles/default-rj-thumb.jpg",
+              "thumb": "https://assets.rjassets.com/static/profiles/default-rj-thumb-x.jpg"
+            },
+            "caption": "Haamim, Babak Jahanbakhsh, Majid Razavi",
+            "myplaylist": false,
+            "collab": false
+          },
+          {
+            "id": "3a3047f210c4",
+            "title": "Javanan",
+            "items_count": 80,
+            "created_at": "2021-09-26T15:57:04-04:00",
+            "type": "playlist",
+            "subtype": "mp3",
+            "share_link": "https://rj.app/pm/g72aLqEw",
+            "count": 80,
+            "followers": 19857,
+            "public": true,
+            "last_updated_at": "2025-09-27T01:53:25-04:00",
+            "bg_color": "#3e4e43",
+            "custom_photo": false,
+            "show_track_numbers": false,
+            "bg_colors": [
+              "#3e4e43",
+              "#3e4e43"
+            ],
+            "desc": "The next generation of young artists.",
+            "photo": "https://assets.rjassets.com/static/playlist/12873216/e814fcf099168c9.jpg",
+            "thumbnail": "https://assets.rjassets.com/static/playlist/12873216/e814fcf099168c9-thumb.jpg",
+            "photo_player": "https://assets.rjassets.com/static/playlist/12873216/e814fcf099168c9.jpg",
+            "default_artwork": "https://assets.rjassets.com/static/playlist/12873216/e52343b80a65924-artwork.jpg",
+            "created_by": "By Radio Javan",
+            "created_title": "Radio Javan",
+            "owner": {
+              "display_name": "Radio Javan",
+              "photo": "https://assets.rjassets.com/static/profiles/default-rj-thumb.jpg",
+              "thumb": "https://assets.rjassets.com/static/profiles/default-rj-thumb-x.jpg"
+            },
+            "caption": "Helia, Farnaz Michelle, Tamara, Lara, Isam",
+            "myplaylist": false,
+            "collab": false
+          },
+          {
+            "id": "18c548b6b363",
+            "title": "Study Time",
+            "items_count": 32,
+            "created_at": "2023-05-05T18:53:30-04:00",
+            "type": "playlist",
+            "subtype": "mp3",
+            "share_link": "https://rj.app/pm/g63Kve74",
+            "count": 32,
+            "followers": 6382,
+            "public": true,
+            "last_updated_at": "2025-09-15T20:49:19-04:00",
+            "bg_color": "#bc0001",
+            "custom_photo": false,
+            "show_track_numbers": false,
+            "bg_colors": [
+              "#bc0001",
+              "#bc0001"
+            ],
+            "photo": "https://assets.rjassets.com/static/playlist/17509353/38a98e3fe88db0b.jpg",
+            "thumbnail": "https://assets.rjassets.com/static/playlist/17509353/38a98e3fe88db0b-thumb.jpg",
+            "photo_player": "https://assets.rjassets.com/static/playlist/17509353/38a98e3fe88db0b.jpg",
+            "default_artwork": "https://assets.rjassets.com/static/playlist/17509353/0bf73a7db140a6b-artwork.jpg",
+            "created_by": "By Radio Javan",
+            "created_title": "Radio Javan",
+            "owner": {
+              "display_name": "Radio Javan",
+              "photo": "https://assets.rjassets.com/static/profiles/default-rj-thumb.jpg",
+              "thumb": "https://assets.rjassets.com/static/profiles/default-rj-thumb-x.jpg"
+            },
+            "caption": "Fereydoun, Naser Zeynali, Masih & Arash AP",
+            "myplaylist": false,
+            "collab": false
+          },
+          {
+            "id": "43b324641a2a",
+            "title": "Old School",
+            "items_count": 60,
+            "created_at": "2015-01-06T23:59:24-05:00",
+            "type": "playlist",
+            "subtype": "mp3",
+            "share_link": "https://rj.app/pm/vgEvKYB4",
+            "count": 60,
+            "followers": 89361,
+            "public": true,
+            "last_updated_at": "2025-10-10T14:11:33-04:00",
+            "cover": "https://assets.rjassets.com/static/playlist/1252902/1d0e899f1e7957f.jpg",
+            "bg_color": "#2b4527",
+            "custom_photo": false,
+            "show_track_numbers": false,
+            "bg_colors": [
+              "#2b4527",
+              "#2b4527"
+            ],
+            "photo": "https://assets.rjassets.com/static/playlist/1252902/75f8ebe79a19cde.jpg",
+            "thumbnail": "https://assets.rjassets.com/static/playlist/1252902/75f8ebe79a19cde-thumb.jpg",
+            "photo_player": "https://assets.rjassets.com/static/playlist/1252902/75f8ebe79a19cde.jpg",
+            "default_artwork": "https://assets.rjassets.com/static/playlist/1252902/92107635f1b7ac5-artwork.jpg",
+            "created_by": "By Radio Javan",
+            "created_title": "Radio Javan",
+            "owner": {
+              "display_name": "Radio Javan",
+              "photo": "https://assets.rjassets.com/static/profiles/default-rj-thumb.jpg",
+              "thumb": "https://assets.rjassets.com/static/profiles/default-rj-thumb-x.jpg"
+            },
+            "caption": "Mahasti, Ebi, Shohreh, Mansour",
+            "myplaylist": false,
+            "collab": false
+          },
+          {
+            "id": "fcf451f71774",
+            "title": "Club Hits",
+            "items_count": 40,
+            "created_at": "2015-06-17T15:58:42-04:00",
+            "type": "playlist",
+            "subtype": "mp3",
+            "share_link": "https://rj.app/pm/d43JGodg",
+            "count": 40,
+            "followers": 37819,
+            "public": true,
+            "last_updated_at": "2025-09-07T13:08:29-04:00",
+            "bg_color": "#ab1413",
+            "custom_photo": false,
+            "show_track_numbers": false,
+            "bg_colors": [
+              "#ab1413",
+              "#ab1413"
+            ],
+            "photo": "https://assets.rjassets.com/static/playlist/1610245/3458db89d691f8e.jpg",
+            "thumbnail": "https://assets.rjassets.com/static/playlist/1610245/3458db89d691f8e-thumb.jpg",
+            "photo_player": "https://assets.rjassets.com/static/playlist/1610245/3458db89d691f8e.jpg",
+            "default_artwork": "https://assets.rjassets.com/static/playlist/1610245/92cd0cff077908c-artwork.jpg",
+            "created_by": "By Radio Javan",
+            "created_title": "Radio Javan",
+            "owner": {
+              "display_name": "Radio Javan",
+              "photo": "https://assets.rjassets.com/static/profiles/default-rj-thumb.jpg",
+              "thumb": "https://assets.rjassets.com/static/profiles/default-rj-thumb-x.jpg"
+            },
+            "caption": "Amiaa, Sepehr Khalse, Fedi, Aron Afshar",
+            "myplaylist": false,
+            "collab": false
+          },
+          {
+            "id": "0f450eb2f6ee",
+            "title": "6'8 Gheri",
+            "items_count": 100,
+            "created_at": "2015-06-05T13:33:14-04:00",
+            "type": "playlist",
+            "subtype": "mp3",
+            "share_link": "https://rj.app/pm/Ajba18z4",
+            "count": 100,
+            "followers": 139222,
+            "public": true,
+            "last_updated_at": "2025-10-11T13:27:04-04:00",
+            "bg_color": "#9c7f45",
+            "custom_photo": false,
+            "show_track_numbers": false,
+            "bg_colors": [
+              "#9c7f45",
+              "#9c7f45"
+            ],
+            "photo": "https://assets.rjassets.com/static/playlist/1582767/a3dd7e73130bdf5.jpg",
+            "thumbnail": "https://assets.rjassets.com/static/playlist/1582767/a3dd7e73130bdf5-thumb.jpg",
+            "photo_player": "https://assets.rjassets.com/static/playlist/1582767/a3dd7e73130bdf5.jpg",
+            "default_artwork": "https://assets.rjassets.com/static/playlist/1582767/8835c6a27e9b085-artwork.jpg",
+            "created_by": "By Radio Javan",
+            "created_title": "Radio Javan",
+            "owner": {
+              "display_name": "Radio Javan",
+              "photo": "https://assets.rjassets.com/static/profiles/default-rj-thumb.jpg",
+              "thumb": "https://assets.rjassets.com/static/profiles/default-rj-thumb-x.jpg"
+            },
+            "caption": "Shadmehr Aghili, Donya, Omid, Jamshid, Ahllam",
+            "myplaylist": false,
+            "collab": false
+          },
+          {
+            "id": "6062afd022cb",
+            "title": "Akhare Shab",
+            "items_count": 50,
+            "created_at": "2017-10-31T11:23:16-04:00",
+            "type": "playlist",
+            "subtype": "mp3",
+            "share_link": "https://rj.app/pm/wv78p2qg",
+            "count": 50,
+            "followers": 55518,
+            "public": true,
+            "last_updated_at": "2025-10-11T13:25:13-04:00",
+            "bg_color": "#4b1900",
+            "custom_photo": false,
+            "show_track_numbers": false,
+            "bg_colors": [
+              "#4b1900",
+              "#4b1900"
+            ],
+            "photo": "https://assets.rjassets.com/static/playlist/5845156/722a4a6758a2b43.jpg",
+            "thumbnail": "https://assets.rjassets.com/static/playlist/5845156/722a4a6758a2b43-thumb.jpg",
+            "photo_player": "https://assets.rjassets.com/static/playlist/5845156/722a4a6758a2b43.jpg",
+            "default_artwork": "https://assets.rjassets.com/static/playlist/5845156/c3304434553c71e-artwork.jpg",
+            "created_by": "By Radio Javan",
+            "created_title": "Radio Javan",
+            "owner": {
+              "display_name": "Radio Javan",
+              "photo": "https://assets.rjassets.com/static/profiles/default-rj-thumb.jpg",
+              "thumb": "https://assets.rjassets.com/static/profiles/default-rj-thumb-x.jpg"
+            },
+            "caption": "Kiyarash, Majid Razavi, Tamara, Dekamond",
+            "myplaylist": false,
+            "collab": false
+          },
+          {
+            "id": "6ee14746219b",
+            "title": "Dahe 90 Hip Hop",
+            "items_count": 80,
+            "created_at": "2025-09-26T18:00:21-04:00",
+            "type": "playlist",
+            "subtype": "mp3",
+            "share_link": "https://rj.app/pm/w1YLVzew",
+            "count": 80,
+            "followers": 1104,
+            "public": true,
+            "last_updated_at": "2025-09-26T18:31:05-04:00",
+            "bg_color": "#2947E2",
+            "custom_photo": false,
+            "show_track_numbers": false,
+            "bg_colors": [
+              "#2947E2",
+              "#2947E2"
+            ],
+            "photo": "https://assets.rjassets.com/static/playlist/37496349/aa63f3bb0ed3f6d.jpg",
+            "thumbnail": "https://assets.rjassets.com/static/playlist/37496349/aa63f3bb0ed3f6d-thumb.jpg",
+            "photo_player": "https://assets.rjassets.com/static/playlist/37496349/aa63f3bb0ed3f6d.jpg",
+            "default_artwork": "https://assets.rjassets.com/static/playlist/37496349/e9b7596ce0ac6be-artwork.jpg",
+            "created_by": "By Radio Javan",
+            "created_title": "Radio Javan",
+            "owner": {
+              "display_name": "Radio Javan",
+              "photo": "https://assets.rjassets.com/static/profiles/default-rj-thumb.jpg",
+              "thumb": "https://assets.rjassets.com/static/profiles/default-rj-thumb-x.jpg"
+            },
+            "caption": "Alireza JJ, Mehrad Hidden, Sijal, and more",
+            "myplaylist": false,
+            "collab": false
+          },
+          {
+            "id": "b27131390e03",
+            "title": "Broken Heart",
+            "items_count": 81,
+            "created_at": "2015-05-26T11:58:15-04:00",
+            "type": "playlist",
+            "subtype": "mp3",
+            "share_link": "https://rj.app/pm/GwzYJ0lj",
+            "count": 81,
+            "followers": 35238,
+            "public": true,
+            "last_updated_at": "2025-10-12T12:45:49-04:00",
+            "bg_color": "#9A8167",
+            "custom_photo": false,
+            "show_track_numbers": false,
+            "bg_colors": [
+              "#9A8167",
+              "#9A8167"
+            ],
+            "photo": "https://assets.rjassets.com/static/playlist/1550324/d86996ea7c2862b.jpg",
+            "thumbnail": "https://assets.rjassets.com/static/playlist/1550324/d86996ea7c2862b-thumb.jpg",
+            "photo_player": "https://assets.rjassets.com/static/playlist/1550324/d86996ea7c2862b.jpg",
+            "default_artwork": "https://assets.rjassets.com/static/playlist/1550324/5037c96f0327164-artwork.jpg",
+            "created_by": "By Radio Javan",
+            "created_title": "Radio Javan",
+            "owner": {
+              "display_name": "Radio Javan",
+              "photo": "https://assets.rjassets.com/static/profiles/default-rj-thumb.jpg",
+              "thumb": "https://assets.rjassets.com/static/profiles/default-rj-thumb-x.jpg"
+            },
+            "caption": "Haamim, Reza Bahram, Tamara, Elya",
+            "myplaylist": false,
+            "collab": false
+          }
+        ],
+        "hide_icon": true
+      },
+      {
+        "id": "top_artists_header",
+        "type": "header",
+        "title": "Top Artists",
+        "show_link": false
+      },
+      {
+        "id": "top_artists_header",
+        "type": "slider_square",
+        "items": [
+          {
+            "name": "Majid Razavi",
+            "query": "Majid Razavi",
+            "id": "Majid Razavi",
+            "photo": "https://assets.rjassets.com/static/artists/photos/majid-razavi-e75dd24ce78bdd3-photo.jpg",
+            "thumbnail": "https://assets.rjassets.com/static/artists/photos/majid-razavi-e75dd24ce78bdd3-photo-thumb.jpg",
+            "type": "artist",
+            "share_link": "https://rj.app/a/4gv4dJvo",
+            "item_subtitle": "262K followers"
+          },
+          {
+            "name": "Masih & Arash AP",
+            "query": "Masih & Arash AP",
+            "id": "Masih & Arash AP",
+            "photo": "https://assets.rjassets.com/static/artists/photos/masih-arash-ap-7fdf49718788304-photo.jpg",
+            "thumbnail": "https://assets.rjassets.com/static/artists/photos/masih-arash-ap-7fdf49718788304-photo-thumb.jpg",
+            "type": "artist",
+            "share_link": "https://rj.app/a/DE6oj7bz",
+            "item_subtitle": "322K followers"
+          },
+          {
+            "name": "Behnam Bani",
+            "query": "Behnam Bani",
+            "id": "Behnam Bani",
+            "photo": "https://assets.rjassets.com/static/artists/photos/behnam-bani-d0768c62859be2f-photo.jpg",
+            "thumbnail": "
