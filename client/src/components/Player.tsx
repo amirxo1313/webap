@@ -94,12 +94,29 @@ export function Player() {
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
+      const filename = `${currentMedia.artist || 'Unknown'} - ${currentMedia.title}.${currentMedia.type === 'video' ? 'mp4' : 'mp3'}`;
       a.href = url;
-      a.download = `${currentMedia.artist || 'Unknown'} - ${currentMedia.title}.${currentMedia.type === 'video' ? 'mp4' : 'mp3'}`;
+      a.download = filename;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
+
+      // Save download to localStorage
+      const downloadItem = {
+        id: currentMedia.id,
+        title: currentMedia.title,
+        artist: currentMedia.artist,
+        type: currentMedia.type,
+        downloadedAt: new Date().toISOString(),
+        fileSize: `${(blob.size / 1024 / 1024).toFixed(2)} MB`,
+        originalMedia: currentMedia
+      };
+
+      const existingDownloads = JSON.parse(localStorage.getItem('behimelobot_downloads') || '[]');
+      const updatedDownloads = [downloadItem, ...existingDownloads.filter((item: any) => item.id !== currentMedia.id)];
+      localStorage.setItem('behimelobot_downloads', JSON.stringify(updatedDownloads));
+
     } catch (error) {
       console.error('Download failed:', error);
     }
@@ -124,7 +141,7 @@ export function Player() {
         className="hidden"
       />
 
-      <div className="fixed bottom-14 left-0 right-0 z-50 bg-card/95 backdrop-blur-xl border-t border-card-border">
+      <div className="fixed bottom-14 left-0 right-0 z-50 bg-card/95 backdrop-blur-xl border-t border-card-border neon-glow-sm">
         <div className="absolute top-0 left-0 right-0 -translate-y-full">
           <Slider
             value={[progress]}
@@ -178,7 +195,7 @@ export function Player() {
 
               <Button
                 size="icon"
-                className="w-12 h-12 rounded-full shadow-neon-purple"
+                className="w-12 h-12 rounded-full neon-glow pulse-glow"
                 onClick={togglePlay}
                 data-testid="button-play-pause"
               >

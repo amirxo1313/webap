@@ -132,17 +132,17 @@
   --elevate-1: rgba(255,255,255, .04);
   --elevate-2: rgba(255,255,255, .09);
 
-  --background: 0 0% 8%;
+  --background: 0 0% 0%; /* Pure black background */
 
   --foreground: 0 0% 98%;
 
-  --border: 0 0% 18%;
+  --border: 270 15% 15%; /* Purple-tinted borders */
 
-  --card: 0 0% 12%;
+  --card: 0 0% 4%; /* Very dark cards */
 
   --card-foreground: 0 0% 98%;
 
-  --card-border: 0 0% 16%;
+  --card-border: 270 15% 8%; /* Purple-tinted card borders */
 
   --sidebar: 0 0% 10%;
 
@@ -166,21 +166,21 @@
 
   --popover-border: 0 0% 18%;
 
-  --primary: 270 95% 55%;
+  --primary: 270 95% 65%; /* Bright purple/neon primary */
 
-  --primary-foreground: 270 95% 98%;
+  --primary-foreground: 0 0% 0%; /* Black text on purple */
 
-  --secondary: 0 2% 18%;
+  --secondary: 270 20% 12%; /* Dark purple secondary */
 
-  --secondary-foreground: 0 2% 90%;
+  --secondary-foreground: 270 95% 90%;
 
-  --muted: 270 8% 16%;
+  --muted: 270 15% 8%; /* Very dark purple muted */
 
-  --muted-foreground: 270 8% 70%;
+  --muted-foreground: 270 20% 70%;
 
-  --accent: 270 12% 16%;
+  --accent: 280 100% 70%; /* Neon accent color */
 
-  --accent-foreground: 270 12% 85%;
+  --accent-foreground: 0 0% 0%;
 
   --destructive: 0 84% 45%;
 
@@ -332,5 +332,62 @@
   .border.active-elevate-2:not(.no-active-interaction-elevate)::after,
   .border.hover-elevate:not(.no-hover-interaction-elevate)::after {
     inset: -1px;
+  }
+
+  /* Behimelobot Custom Styles */
+  .neon-glow {
+    box-shadow: 0 0 20px hsl(270 95% 65% / 0.4), 0 0 40px hsl(270 95% 65% / 0.2);
+  }
+
+  .neon-glow-sm {
+    box-shadow: 0 0 10px hsl(270 95% 65% / 0.5), 0 0 20px hsl(270 95% 65% / 0.3);
+  }
+
+  .neon-text {
+    text-shadow: 0 0 10px hsl(270 95% 65% / 0.8), 0 0 20px hsl(270 95% 65% / 0.6);
+  }
+
+  .gradient-bg {
+    background: linear-gradient(135deg, hsl(270 95% 65% / 0.1) 0%, hsl(280 100% 70% / 0.1) 100%);
+  }
+
+  .pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite alternate;
+  }
+
+  @keyframes pulse-glow {
+    from {
+      box-shadow: 0 0 20px hsl(270 95% 65% / 0.4);
+    }
+    to {
+      box-shadow: 0 0 30px hsl(270 95% 65% / 0.8), 0 0 40px hsl(270 95% 65% / 0.4);
+    }
+  }
+
+  .floating-animation {
+    animation: floating 3s ease-in-out infinite;
+  }
+
+  @keyframes floating {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+
+  /* Scrollbar styling for dark theme */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: hsl(0 0% 4%);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: hsl(270 95% 65% / 0.6);
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(270 95% 65% / 0.8);
   }
 }

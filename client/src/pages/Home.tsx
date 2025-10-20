@@ -2,12 +2,15 @@ import { useQuery } from "@tanstack/react-query";
 import { HomeResponse } from "@shared/schema";
 import { Layout } from "@/components/Layout";
 import { MediaCard } from "@/components/MediaCard";
-import { Music2, TrendingUp, Loader2 } from "lucide-react";
+import { Music2, TrendingUp, Loader2, RefreshCw, AlertCircle } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 export default function Home() {
-  const { data, isLoading, error } = useQuery<HomeResponse>({
+  const { data, isLoading, error, refetch } = useQuery<HomeResponse>({
     queryKey: ['/api/radiojavan/home'],
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 
   if (isLoading) {
@@ -27,12 +30,20 @@ export default function Home() {
     return (
       <Layout>
         <div className="flex items-center justify-center min-h-[60vh]">
-          <Card className="p-8 text-center max-w-md">
-            <Music2 className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-            <h2 className="text-xl font-semibold mb-2">Unable to load content</h2>
-            <p className="text-muted-foreground" data-testid="text-error">
-              Please check your connection and try again.
+          <Card className="p-8 text-center max-w-md gradient-bg">
+            <AlertCircle className="w-16 h-16 text-destructive mx-auto mb-4 floating-animation" />
+            <h2 className="text-xl font-semibold mb-2 neon-text">Unable to load content</h2>
+            <p className="text-muted-foreground mb-4" data-testid="text-error">
+              {error instanceof Error ? error.message : "Please check your connection and try again."}
             </p>
+            <Button 
+              onClick={() => refetch()} 
+              className="gap-2 neon-glow-sm"
+              variant="outline"
+            >
+              <RefreshCw className="w-4 h-4" />
+              Try Again
+            </Button>
           </Card>
         </div>
       </Layout>

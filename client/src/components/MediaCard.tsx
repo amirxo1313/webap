@@ -38,7 +38,7 @@ export function MediaCard({ item, onClick }: MediaCardProps) {
 
   return (
     <Card
-      className="group relative overflow-hidden hover-elevate active-elevate-2 transition-all cursor-pointer"
+      className="group relative overflow-hidden hover-elevate active-elevate-2 transition-all cursor-pointer hover:neon-glow-sm"
       onClick={onClick}
       data-testid={`card-media-${item.id}`}
     >
@@ -51,16 +51,16 @@ export function MediaCard({ item, onClick }: MediaCardProps) {
             loading="lazy"
           />
         ) : (
-          <div className="w-full h-full bg-card flex items-center justify-center">
-            <Music className="w-16 h-16 text-muted-foreground" />
+          <div className="w-full h-full bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center">
+            <Music className="w-16 h-16 text-primary/50" />
           </div>
         )}
         
         {hasPlayableMedia && (
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
             <button
               onClick={handlePlay}
-              className="absolute bottom-4 right-4 w-12 h-12 rounded-full bg-primary hover:bg-primary/90 flex items-center justify-center transition-all transform translate-y-2 group-hover:translate-y-0 shadow-neon-purple"
+              className="absolute bottom-4 right-4 w-12 h-12 rounded-full bg-primary hover:bg-primary/90 flex items-center justify-center transition-all transform translate-y-2 group-hover:translate-y-0 neon-glow pulse-glow"
               data-testid={`button-play-${item.id}`}
             >
               <Play className="w-5 h-5 text-primary-foreground fill-current ml-0.5" />
@@ -69,9 +69,9 @@ export function MediaCard({ item, onClick }: MediaCardProps) {
         )}
       </div>
 
-      <div className="p-4">
+      <div className="p-4 gradient-bg">
         <h3
-          className="font-semibold text-foreground truncate mb-1"
+          className="font-semibold text-foreground truncate mb-1 group-hover:neon-text transition-all"
           data-testid={`text-title-${item.id}`}
         >
           {item.title}

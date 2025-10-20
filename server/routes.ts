@@ -22,20 +22,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
     next();
   });
 
-  // Helper function to make requests to Radio Javan API
+  // Helper function to make requests to Radio Javan API with caching
+  const cache = new Map<string, { data: any; timestamp: number }>();
+  const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
   const makeRadioJavanRequest = async (endpoint: string, params: any = {}) => {
+    const cacheKey = `${endpoint}:${JSON.stringify(params)}`;
+    const cached = cache.get(cacheKey);
+    
+    // Return cached data if still valid
+    if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+      return cached.data;
+    }
+
     try {
       const response = await axios.get(`${RADIO_JAVAN_BASE_URL}${endpoint}`, {
         headers: {
           'accept': '*/*',
           'one-api-token': ONE_API_TOKEN,
+          'User-Agent': 'Behimelobot/1.0',
         },
         params,
         timeout: 30000,
+        validateStatus: (status) => status < 500, // Don't throw for 4xx errors
       });
+
+      // Cache successful responses
+      if (response.status === 200) {
+        cache.set(cacheKey, {
+          data: response.data,
+          timestamp: Date.now()
+        });
+      }
+
       return response.data;
     } catch (error: any) {
-      console.error(`Radio Javan API Error (${endpoint}):`, error.message);
+      console.error(`Radio Javan API Error (${endpoint}):`, {
+        message: error.message,
+        status: error.response?.status,
+        data: error.response?.data
+      });
+      
+      // Return cached data as fallback if available
+      if (cached) {
+        console.log(`Using stale cache for ${endpoint}`);
+        return cached.data;
+      }
+      
       throw error;
     }
   };
