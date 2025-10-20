@@ -1,0 +1,53 @@
+# 🎵 Behimelobot - Complete Project Code
+
+## نحوه استفاده:
+1. این فایل را کپی کنید
+2. در سرور خود پوشه‌ای به نام behimelobot بسازید
+3. فایل‌ها را طبق ساختار زیر ایجاد کنید
+
+## ساختار پروژه:
+```
+behimelobot/
+├── package.json
+├── tsconfig.json
+├── vite.config.ts
+├── tailwind.config.ts
+├── postcss.config.js
+├── components.json
+├── .env.example
+├── README.md
+├── LICENSE
+├── Dockerfile
+├── docker-compose.yml
+├── nginx.conf
+├── deploy.sh
+├── jest.config.cjs
+├── jest.setup.cjs
+├── client/
+│   ├── index.html
+│   └── src/
+│       ├── main.tsx
+│       ├── App.tsx
+│       ├── index.css
+│       ├── components/
+│       ├── pages/
+│       ├── lib/
+│       └── hooks/
+├── server/
+│   ├── index.ts
+│   ├── routes.ts
+│   └── vite.ts
+└── shared/
+    └── schema.ts
+```
+
+## دستورات نصب:
+```bash
+mkdir behimelobot
+cd behimelobot
+npm init -y
+# سپس فایل‌ها را کپی کنید
+npm install
+npm run build
+npm start
+```

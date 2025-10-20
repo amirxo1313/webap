@@ -1,0 +1,60 @@
+# 📁 ساختار پروژه Behimelobot
+
+## فایل‌های اصلی که باید کپی کنید:
+
+### 📦 Root Files:
+- package.json
+- package-lock.json
+- tsconfig.json
+- vite.config.ts
+- tailwind.config.ts
+- postcss.config.js
+- components.json
+- .env.example
+- .gitignore
+- README.md
+- LICENSE
+- Dockerfile
+- docker-compose.yml
+- nginx.conf
+- deploy.sh
+- jest.config.cjs
+- jest.setup.cjs
+
+### 📁 client/
+- client/index.html
+- client/src/main.tsx
+- client/src/App.tsx
+- client/src/index.css
+
+### 📁 client/src/components/
+- client/src/components/Layout.tsx
+- client/src/components/MediaCard.tsx
+- client/src/components/Player.tsx
+- client/src/components/TrackList.tsx
+
+### 📁 client/src/pages/
+- client/src/pages/Home.tsx
+- client/src/pages/Search.tsx
+- client/src/pages/Downloads.tsx
+- client/src/pages/not-found.tsx
+
+### 📁 client/src/lib/
+- client/src/lib/playerStore.ts
+- client/src/lib/queryClient.ts
+- client/src/lib/utils.ts
+
+### 📁 client/src/hooks/
+- client/src/hooks/use-mobile.tsx
+- client/src/hooks/use-toast.ts
+
+### 📁 server/
+- server/index.ts
+- server/routes.ts
+- server/vite.ts
+
+### 📁 shared/
+- shared/schema.ts
+
+### 📁 client/src/components/ui/ (35+ فایل)
+تمام فایل‌های UI components موجود
