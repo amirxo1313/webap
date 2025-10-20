@@ -1,0 +1,908 @@
+# 🎵 BEHIMELOBOT - COMPLETE PROJECT CODE - PART 4
+# فایل‌های سرور، shared و تست‌ها
+
+# ========================================
+# 📁 SHARED FILES
+# ========================================
+
+# ========== shared/schema.ts ==========
+import { z } from "zod";
+
+// Radio Javan API Response Types
+
+export const playlistItemSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  items_count: z.number().optional(),
+  created_at: z.string().optional(),
+  type: z.string(),
+  subtype: z.string().optional(),
+  share_link: z.string().optional(),
+  count: z.number().optional(),
+  followers: z.number().optional(),
+  public: z.boolean().optional(),
+  last_updated_at: z.string().optional(),
+  bg_color: z.string().optional(),
+  custom_photo: z.boolean().optional(),
+  show_track_numbers: z.boolean().optional(),
+  bg_colors: z.array(z.string()).optional(),
+  desc: z.string().optional(),
+  photo: z.string().optional(),
+  thumbnail: z.string().optional(),
+  photo_player: z.string().optional(),
+  default_artwork: z.string().optional(),
+  created_by: z.string().optional(),
+  created_title: z.string().optional(),
+  owner: z.object({
+    display_name: z.string(),
+    photo: z.string(),
+    thumb: z.string(),
+  }).optional(),
+  caption: z.string().optional(),
+  myplaylist: z.boolean().optional(),
+  collab: z.boolean().optional(),
+  artist: z.string().optional(),
+  album: z.string().optional(),
+  duration: z.string().optional(),
+  plays: z.number().optional(),
+  likes: z.number().optional(),
+  downloads: z.number().optional(),
+  link: z.string().optional(),
+  hq_link: z.string().optional(),
+  hls_link: z.string().optional(),
+  photo_cover: z.string().optional(),
+  name: z.string().optional(),
+  follower_count: z.number().optional(),
+  photo_thumb: z.string().optional(),
+});
+
+export const sectionSchema = z.object({
+  id: z.string(),
+  type: z.string(),
+  title: z.string().optional(),
+  show_link: z.boolean().optional(),
+  items: z.array(playlistItemSchema).optional(),
+});
+
+export const homeResponseSchema = z.object({
+  status: z.number(),
+  result: z.object({
+    sections: z.array(sectionSchema),
+  }),
+});
+
+export const searchResponseSchema = z.object({
+  status: z.number(),
+  result: z.object({
+    songs: z.array(playlistItemSchema).optional(),
+    albums: z.array(playlistItemSchema).optional(),
+    artists: z.array(playlistItemSchema).optional(),
+    playlists: z.array(playlistItemSchema).optional(),
+    videos: z.array(playlistItemSchema).optional(),
+    podcasts: z.array(playlistItemSchema).optional(),
+  }),
+});
+
+export const playlistDetailSchema = z.object({
+  status: z.number(),
+  result: z.object({
+    playlist: playlistItemSchema,
+    tracks: z.array(playlistItemSchema),
+  }),
+});
+
+// Export types
+export type PlaylistItem = z.infer<typeof playlistItemSchema>;
+export type Section = z.infer<typeof sectionSchema>;
+export type HomeResponse = z.infer<typeof homeResponseSchema>;
+export type SearchResponse = z.infer<typeof searchResponseSchema>;
+export type PlaylistDetail = z.infer<typeof playlistDetailSchema>;
+
+// Media types for player
+export type MediaType = 'song' | 'video' | 'podcast';
+
+export interface CurrentMedia {
+  id: string;
+  title: string;
+  artist?: string;
+  album?: string;
+  photo?: string;
+  link?: string;
+  hq_link?: string;
+  hls_link?: string;
+  type: MediaType;
+  duration?: string;
+}
+
+# ========================================
+# 📁 SERVER FILES
+# ========================================
+
+# ========== server/index.ts ==========
+import express, { type Request, Response, NextFunction } from "express";
+import { registerRoutes } from "./routes";
+import { setupVite, serveStatic, log } from "./vite";
+
+const app = express();
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+
+app.use((req, res, next) => {
+  const start = Date.now();
+  const path = req.path;
+  let capturedJsonResponse: Record<string, any> | undefined = undefined;
+
+  const originalResJson = res.json;
+  res.json = function (bodyJson, ...args) {
+    capturedJsonResponse = bodyJson;
+    return originalResJson.apply(res, [bodyJson, ...args]);
+  };
+
+  res.on("finish", () => {
+    const duration = Date.now() - start;
+    if (path.startsWith("/api")) {
+      let logLine = `${req.method} ${path} ${res.statusCode} in ${duration}ms`;
+      if (capturedJsonResponse) {
+        logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
+      }
+
+      if (logLine.length > 80) {
+        logLine = logLine.slice(0, 79) + "…";
+      }
+
+      log(logLine);
+    }
+  });
+
+  next();
+});
+
+(async () => {
+  const server = await registerRoutes(app);
+
+  app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+    const status = err.status || err.statusCode || 500;
+    const message = err.message || "Internal Server Error";
+
+    res.status(status).json({ message });
+    throw err;
+  });
+
+  // importantly only setup vite in development and after
+  // setting up all the other routes so the catch-all route
+  // doesn't interfere with the other routes
+  if (app.get("env") === "development") {
+    await setupVite(app, server);
+  } else {
+    serveStatic(app);
+  }
+
+  // ALWAYS serve the app on the port specified in the environment variable PORT
+  // Other ports are firewalled. Default to 5000 if not specified.
+  // this serves both the API and the client.
+  // It is the only port that is not firewalled.
+  const port = parseInt(process.env.PORT || '5000', 10);
+  server.listen({
+    port,
+    host: "0.0.0.0",
+    reusePort: true,
+  }, () => {
+    log(`serving on port ${port}`);
+  });
+})();
+
+# ========== server/routes.ts ==========
+import type { Express } from "express";
+import { createServer, type Server } from "http";
+import axios from "axios";
+
+const ONE_API_TOKEN = process.env.ONE_API_TOKEN;
+const RADIO_JAVAN_BASE_URL = "https://api.one-api.ir/radiojavan/v1";
+
+if (!ONE_API_TOKEN) {
+  console.error("ERROR: ONE_API_TOKEN environment variable is not set!");
+  process.exit(1);
+}
+
+export async function registerRoutes(app: Express): Promise<Server> {
+  // Middleware for CORS
+  app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type');
+    if (req.method === 'OPTIONS') {
+      return res.sendStatus(200);
+    }
+    next();
+  });
+
+  // Helper function to make requests to Radio Javan API with caching
+  const cache = new Map<string, { data: any; timestamp: number }>();
+  const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+  const makeRadioJavanRequest = async (endpoint: string, params: any = {}) => {
+    const cacheKey = `${endpoint}:${JSON.stringify(params)}`;
+    const cached = cache.get(cacheKey);
+    
+    // Return cached data if still valid
+    if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+      return cached.data;
+    }
+
+    try {
+      const response = await axios.get(`${RADIO_JAVAN_BASE_URL}${endpoint}`, {
+        headers: {
+          'accept': '*/*',
+          'one-api-token': ONE_API_TOKEN,
+          'User-Agent': 'Behimelobot/1.0',
+        },
+        params,
+        timeout: 30000,
+        validateStatus: (status) => status < 500, // Don't throw for 4xx errors
+      });
+
+      // Cache successful responses
+      if (response.status === 200) {
+        cache.set(cacheKey, {
+          data: response.data,
+          timestamp: Date.now()
+        });
+      }
+
+      return response.data;
+    } catch (error: any) {
+      console.error(`Radio Javan API Error (${endpoint}):`, {
+        message: error.message,
+        status: error.response?.status,
+        data: error.response?.data
+      });
+      
+      // Return cached data as fallback if available
+      if (cached) {
+        console.log(`Using stale cache for ${endpoint}`);
+        return cached.data;
+      }
+      
+      throw error;
+    }
+  };
+
+  // Home endpoint - Get trending playlists and content
+  app.get('/api/radiojavan/home', async (req, res) => {
+    try {
+      const data = await makeRadioJavanRequest('/home');
+      res.json(data);
+    } catch (error: any) {
+      console.error('Home endpoint error:', error.message);
+      res.status(error.response?.status || 500).json({
+        status: error.response?.status || 500,
+        error: 'Failed to fetch home content',
+        message: error.message,
+      });
+    }
+  });
+
+  // Search endpoint - Search for songs, albums, artists, playlists, videos, podcasts
+  app.get('/api/radiojavan/search', async (req, res) => {
+    try {
+      const { q } = req.query;
+      
+      if (!q || typeof q !== 'string') {
+        return res.status(400).json({
+          status: 400,
+          error: 'Search query is required',
+        });
+      }
+
+      const data = await makeRadioJavanRequest('/search', { q });
+      res.json(data);
+    } catch (error: any) {
+      console.error('Search endpoint error:', error.message);
+      res.status(error.response?.status || 500).json({
+        status: error.response?.status || 500,
+        error: 'Failed to search',
+        message: error.message,
+      });
+    }
+  });
+
+  // Playlist details endpoint
+  app.get('/api/radiojavan/playlist/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const data = await makeRadioJavanRequest(`/playlist/${id}`);
+      res.json(data);
+    } catch (error: any) {
+      console.error('Playlist endpoint error:', error.message);
+      res.status(error.response?.status || 500).json({
+        status: error.response?.status || 500,
+        error: 'Failed to fetch playlist',
+        message: error.message,
+      });
+    }
+  });
+
+  // Song details endpoint
+  app.get('/api/radiojavan/song/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const data = await makeRadioJavanRequest(`/song/${id}`);
+      res.json(data);
+    } catch (error: any) {
+      console.error('Song endpoint error:', error.message);
+      res.status(error.response?.status || 500).json({
+        status: error.response?.status || 500,
+        error: 'Failed to fetch song',
+        message: error.message,
+      });
+    }
+  });
+
+  // Album details endpoint
+  app.get('/api/radiojavan/album/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const data = await makeRadioJavanRequest(`/album/${id}`);
+      res.json(data);
+    } catch (error: any) {
+      console.error('Album endpoint error:', error.message);
+      res.status(error.response?.status || 500).json({
+        status: error.response?.status || 500,
+        error: 'Failed to fetch album',
+        message: error.message,
+      });
+    }
+  });
+
+  // Artist details endpoint
+  app.get('/api/radiojavan/artist/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const data = await makeRadioJavanRequest(`/artist/${id}`);
+      res.json(data);
+    } catch (error: any) {
+      console.error('Artist endpoint error:', error.message);
+      res.status(error.response?.status || 500).json({
+        status: error.response?.status || 500,
+        error: 'Failed to fetch artist',
+        message: error.message,
+      });
+    }
+  });
+
+  // Video details endpoint
+  app.get('/api/radiojavan/video/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const data = await makeRadioJavanRequest(`/video/${id}`);
+      res.json(data);
+    } catch (error: any) {
+      console.error('Video endpoint error:', error.message);
+      res.status(error.response?.status || 500).json({
+        status: error.response?.status || 500,
+        error: 'Failed to fetch video',
+        message: error.message,
+      });
+    }
+  });
+
+  // Podcast details endpoint
+  app.get('/api/radiojavan/podcast/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const data = await makeRadioJavanRequest(`/podcast/${id}`);
+      res.json(data);
+    } catch (error: any) {
+      console.error('Podcast endpoint error:', error.message);
+      res.status(error.response?.status || 500).json({
+        status: error.response?.status || 500,
+        error: 'Failed to fetch podcast',
+        message: error.message,
+      });
+    }
+  });
+
+  // Download proxy endpoint
+  app.get('/api/radiojavan/download', async (req, res) => {
+    try {
+      const { url } = req.query;
+      
+      if (!url || typeof url !== 'string') {
+        return res.status(400).json({
+          status: 400,
+          error: 'Download URL is required',
+        });
+      }
+
+      // Stream the file directly to the client
+      const response = await axios.get(url, {
+        responseType: 'stream',
+        timeout: 60000,
+      });
+
+      // Set appropriate headers
+      res.setHeader('Content-Type', response.headers['content-type'] || 'audio/mpeg');
+      res.setHeader('Content-Disposition', 'attachment');
+      
+      // Pipe the stream
+      response.data.pipe(res);
+    } catch (error: any) {
+      console.error('Download endpoint error:', error.message);
+      res.status(error.response?.status || 500).json({
+        status: error.response?.status || 500,
+        error: 'Failed to download file',
+        message: error.message,
+      });
+    }
+  });
+
+  // Health check endpoint
+  app.get('/api/health', (req, res) => {
+    res.json({
+      status: 'ok',
+      timestamp: new Date().toISOString(),
+      service: 'Behimelobot API',
+      token_configured: !!ONE_API_TOKEN,
+    });
+  });
+
+  const httpServer = createServer(app);
+
+  return httpServer;
+}
+
+# ========== server/vite.ts ==========
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+import type { Express } from "express";
+import type { Server } from "http";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+export const log = (message: string) => {
+  const formattedTime = new Date().toLocaleTimeString("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: true,
+  });
+
+  console.log(`${formattedTime} [express] ${message}`);
+};
+
+export async function setupVite(app: Express, server: Server) {
+  const vite = await (
+    await import("vite")
+  ).createServer({
+    server: { middlewareMode: true },
+    appType: "spa",
+  });
+
+  app.use(vite.ssrFixStacktrace);
+  app.use(vite.middlewares);
+}
+
+export function serveStatic(app: Express) {
+  const distPath = path.resolve(__dirname, "../dist/public");
+
+  if (!fs.existsSync(distPath)) {
+    throw new Error(
+      `Could not find the build directory: ${distPath}, make sure to build the client first`
+    );
+  }
+
+  app.use(express.static(distPath));
+  app.get("*", (_req, res) => {
+    res.sendFile(path.resolve(distPath, "index.html"));
+  });
+}
+
+# ========================================
+# 📁 TEST FILES
+# ========================================
+
+# ========== jest.config.cjs ==========
+module.exports = {
+  preset: 'ts-jest',
+  testEnvironment: 'jsdom',
+  roots: ['<rootDir>/client/src', '<rootDir>/server', '<rootDir>/shared'],
+  testMatch: [
+    '**/__tests__/**/*.+(ts|tsx|js)',
+    '**/*.(test|spec).+(ts|tsx|js)'
+  ],
+  transform: {
+    '^.+\\.(ts|tsx)$': 'ts-jest',
+  },
+  collectCoverageFrom: [
+    'client/src/**/*.{ts,tsx}',
+    'server/**/*.{ts,tsx}',
+    'shared/**/*.{ts,tsx}',
+    '!**/*.d.ts',
+    '!**/node_modules/**',
+    '!**/build/**',
+    '!**/dist/**'
+  ],
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.cjs'],
+  moduleNameMapping: {
+    '^@/(.*)$': '<rootDir>/client/src/$1',
+    '^@shared/(.*)$': '<rootDir>/shared/$1'
+  },
+  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
+  testPathIgnorePatterns: ['<rootDir>/node_modules/', '<rootDir>/dist/'],
+  coverageDirectory: 'coverage',
+  coverageReporters: ['text', 'lcov', 'html'],
+  verbose: true
+};
+
+# ========== jest.setup.cjs ==========
+import '@testing-library/jest-dom';
+
+// Mock environment variables
+process.env.ONE_API_TOKEN = '752295:68ef56c8bd6eb';
+process.env.NODE_ENV = 'test';
+
+// Mock localStorage
+const localStorageMock = {
+  getItem: jest.fn(),
+  setItem: jest.fn(),
+  removeItem: jest.fn(),
+  clear: jest.fn(),
+};
+global.localStorage = localStorageMock;
+
+// Mock window.URL for downloads
+global.URL.createObjectURL = jest.fn(() => 'mock-url');
+global.URL.revokeObjectURL = jest.fn();
+
+// Mock fetch
+global.fetch = jest.fn();
+
+// Mock audio/video elements
+global.HTMLMediaElement.prototype.load = jest.fn();
+global.HTMLMediaElement.prototype.play = jest.fn().mockResolvedValue(undefined);
+global.HTMLMediaElement.prototype.pause = jest.fn();
+global.HTMLMediaElement.prototype.addTextTrack = jest.fn();
+
+// Mock IntersectionObserver
+global.IntersectionObserver = class IntersectionObserver {
+  constructor() {}
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+};
+
+# ========== client/src/components/__tests__/Player.test.tsx ==========
+import { render, screen, fireEvent } from '@testing-library/react';
+import { Player } from '../Player';
+import { usePlayerStore } from '@/lib/playerStore';
+
+// Mock the player store
+jest.mock('@/lib/playerStore');
+
+const mockUsePlayerStore = usePlayerStore as jest.MockedFunction<typeof usePlayerStore>;
+
+describe('Player Component', () => {
+  beforeEach(() => {
+    mockUsePlayerStore.mockReturnValue({
+      currentMedia: null,
+      isPlaying: false,
+      volume: 0.5,
+      togglePlay: jest.fn(),
+      setVolume: jest.fn(),
+      setCurrentMedia: jest.fn(),
+    });
+  });
+
+  it('should not render when no media is selected', () => {
+    render(<Player />);
+    expect(screen.queryByTestId('button-play-pause')).not.toBeInTheDocument();
+  });
+
+  it('should render player controls when media is selected', () => {
+    mockUsePlayerStore.mockReturnValue({
+      currentMedia: {
+        id: '1',
+        title: 'Test Song',
+        artist: 'Test Artist',
+        type: 'song',
+        link: 'http://example.com/song.mp3'
+      },
+      isPlaying: false,
+      volume: 0.5,
+      togglePlay: jest.fn(),
+      setVolume: jest.fn(),
+      setCurrentMedia: jest.fn(),
+    });
+
+    render(<Player />);
+    
+    expect(screen.getByTestId('button-play-pause')).toBeInTheDocument();
+    expect(screen.getByTestId('text-player-title')).toHaveTextContent('Test Song');
+    expect(screen.getByTestId('text-player-artist')).toHaveTextContent('Test Artist');
+  });
+
+  it('should toggle play/pause when play button is clicked', () => {
+    const mockTogglePlay = jest.fn();
+    
+    mockUsePlayerStore.mockReturnValue({
+      currentMedia: {
+        id: '1',
+        title: 'Test Song',
+        artist: 'Test Artist',
+        type: 'song',
+        link: 'http://example.com/song.mp3'
+      },
+      isPlaying: false,
+      volume: 0.5,
+      togglePlay: mockTogglePlay,
+      setVolume: jest.fn(),
+      setCurrentMedia: jest.fn(),
+    });
+
+    render(<Player />);
+    
+    const playButton = screen.getByTestId('button-play-pause');
+    fireEvent.click(playButton);
+    
+    expect(mockTogglePlay).toHaveBeenCalledTimes(1);
+  });
+
+  it('should show pause icon when playing', () => {
+    mockUsePlayerStore.mockReturnValue({
+      currentMedia: {
+        id: '1',
+        title: 'Test Song',
+        artist: 'Test Artist',
+        type: 'song',
+        link: 'http://example.com/song.mp3'
+      },
+      isPlaying: true,
+      volume: 0.5,
+      togglePlay: jest.fn(),
+      setVolume: jest.fn(),
+      setCurrentMedia: jest.fn(),
+    });
+
+    render(<Player />);
+    
+    const playButton = screen.getByTestId('button-play-pause');
+    expect(playButton.querySelector('svg')).toHaveClass('lucide-pause');
+  });
+});
+
+# ========== client/src/pages/__tests__/Home.test.tsx ==========
+import { render, screen } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import Home from '../Home';
+
+// Mock the useQuery hook
+jest.mock('@tanstack/react-query', () => ({
+  ...jest.requireActual('@tanstack/react-query'),
+  useQuery: jest.fn(),
+}));
+
+const { useQuery } = require('@tanstack/react-query');
+
+const createWrapper = () => {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
+    },
+  });
+  return ({ children }: { children: React.ReactNode }) => (
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  );
+};
+
+describe('Home Page', () => {
+  it('should show loading state', () => {
+    useQuery.mockReturnValue({
+      data: null,
+      isLoading: true,
+      error: null,
+    });
+
+    render(<Home />, { wrapper: createWrapper() });
+    
+    expect(screen.getByTestId('text-loading')).toHaveTextContent('Loading trending music...');
+  });
+
+  it('should show error state', () => {
+    useQuery.mockReturnValue({
+      data: null,
+      isLoading: false,
+      error: new Error('Network error'),
+    });
+
+    render(<Home />, { wrapper: createWrapper() });
+    
+    expect(screen.getByTestId('text-error')).toHaveTextContent('Network error');
+  });
+
+  it('should render home content when data is loaded', () => {
+    const mockData = {
+      result: {
+        sections: [
+          {
+            id: '1',
+            type: 'header',
+            title: 'Trending Now',
+          },
+          {
+            id: '2',
+            type: 'slider_square',
+            title: 'Popular Songs',
+            items: [
+              {
+                id: 'song1',
+                title: 'Test Song',
+                artist: 'Test Artist',
+                photo: 'http://example.com/photo.jpg',
+                type: 'song'
+              }
+            ]
+          }
+        ]
+      }
+    };
+
+    useQuery.mockReturnValue({
+      data: mockData,
+      isLoading: false,
+      error: null,
+    });
+
+    render(<Home />, { wrapper: createWrapper() });
+    
+    expect(screen.getByTestId('text-section-1')).toHaveTextContent('Trending Now');
+    expect(screen.getByTestId('text-section-2')).toHaveTextContent('Popular Songs');
+  });
+});
+
+# ========== server/__tests__/routes.test.ts ==========
+import request from 'supertest';
+import express from 'express';
+import { registerRoutes } from '../routes';
+
+// Mock axios
+jest.mock('axios');
+const axios = require('axios');
+
+describe('API Routes', () => {
+  let app: express.Express;
+  let server: any;
+
+  beforeEach(async () => {
+    app = express();
+    app.use(express.json());
+    server = await registerRoutes(app);
+    
+    // Set up environment variable
+    process.env.ONE_API_TOKEN = '752295:68ef56c8bd6eb';
+  });
+
+  describe('GET /api/health', () => {
+    it('should return health status', async () => {
+      const response = await request(app)
+        .get('/api/health')
+        .expect(200);
+
+      expect(response.body).toEqual({
+        status: 'ok',
+        timestamp: expect.any(String),
+        service: 'Behimelobot API',
+        token_configured: true,
+      });
+    });
+  });
+
+  describe('GET /api/radiojavan/home', () => {
+    it('should return home data successfully', async () => {
+      const mockData = {
+        status: 200,
+        result: {
+          sections: [
+            {
+              id: '1',
+              type: 'header',
+              title: 'Trending',
+            }
+          ]
+        }
+      };
+
+      axios.get.mockResolvedValue({ data: mockData });
+
+      const response = await request(app)
+        .get('/api/radiojavan/home')
+        .expect(200);
+
+      expect(response.body).toEqual(mockData);
+      expect(axios.get).toHaveBeenCalledWith(
+        'https://api.one-api.ir/radiojavan/v1/home',
+        expect.objectContaining({
+          headers: {
+            'accept': '*/*',
+            'one-api-token': '752295:68ef56c8bd6eb',
+            'User-Agent': 'Behimelobot/1.0',
+          }
+        })
+      );
+    });
+
+    it('should handle API errors', () => {
+      axios.get.mockRejectedValue({
+        response: { status: 500 },
+        message: 'Internal server error'
+      });
+
+      const response = await request(app)
+        .get('/api/radiojavan/home')
+        .expect(500);
+
+      expect(response.body).toEqual({
+        status: 500,
+        error: 'Failed to fetch home content',
+        message: 'Internal server error',
+      });
+    });
+  });
+
+  describe('GET /api/radiojavan/search', () => {
+    it('should search successfully with query', async () => {
+      const mockData = {
+        status: 200,
+        result: {
+          songs: [
+            {
+              id: '1',
+              title: 'Test Song',
+              artist: 'Test Artist'
+            }
+          ]
+        }
+      };
+
+      axios.get.mockResolvedValue({ data: mockData });
+
+      const response = await request(app)
+        .get('/api/radiojavan/search?q=test')
+        .expect(200);
+
+      expect(response.body).toEqual(mockData);
+      expect(axios.get).toHaveBeenCalledWith(
+        'https://api.one-api.ir/radiojavan/v1/search',
+        expect.objectContaining({
+          params: { q: 'test' }
+        })
+      );
+    });
+
+    it('should return error for missing query', async () => {
+      const response = await request(app)
+        .get('/api/radiojavan/search')
+        .expect(400);
+
+      expect(response.body).toEqual({
+        status: 400,
+        error: 'Search query is required',
+      });
+    });
+  });
+
+  describe('GET /api/radiojavan/download', () => {
+    it('should return error for missing URL', async () => {
+      const response = await request(app)
+        .get('/api/radiojavan/download')
+        .expect(400);
+
+      expect(response.body).toEqual({
+        status: 400,
+        error: 'Download URL is required',
+      });
+    });
+  });
+});

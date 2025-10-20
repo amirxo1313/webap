@@ -1,0 +1,746 @@
+# 🎵 BEHIMELOBOT - COMPLETE PROJECT CODE - PART 3
+# ادامه صفحات، کتابخانه‌ها و فایل‌های سرور
+
+# ========== client/src/pages/Search.tsx ==========
+import { useQuery } from "@tanstack/react-query";
+import { useLocation } from "wouter";
+import { SearchResponse } from "@shared/schema";
+import { Layout } from "@/components/Layout";
+import { MediaCard } from "@/components/MediaCard";
+import { TrackList } from "@/components/TrackList";
+import { Search as SearchIcon, Music, Video, Mic, Users, Disc, Loader2 } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useState, useEffect } from "react";
+
+export default function Search() {
+  const [location] = useLocation();
+  const [searchQuery, setSearchQuery] = useState("");
+
+  useEffect(() => {
+    const urlParams = new URLSearchParams(location.split('?')[1] || '');
+    const query = urlParams.get('q') || '';
+    setSearchQuery(query);
+  }, [location]);
+
+  const { data, isLoading, error } = useQuery<SearchResponse>({
+    queryKey: ['/api/radiojavan/search', { q: searchQuery }],
+    enabled: !!searchQuery,
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+  });
+
+  if (!searchQuery) {
+    return (
+      <Layout>
+        <div className="max-w-7xl mx-auto px-4 md:px-8 py-12">
+          <div className="text-center py-20">
+            <SearchIcon className="w-24 h-24 text-muted-foreground mx-auto mb-6 opacity-50 floating-animation" />
+            <h1 className="text-3xl font-display font-bold mb-4 neon-text">Search Persian Music</h1>
+            <p className="text-xl text-muted-foreground">
+              Use the search bar above to find songs, artists, albums, and more
+            </p>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="max-w-7xl mx-auto px-4 md:px-8 py-12">
+          <div className="flex items-center justify-center min-h-[60vh]">
+            <div className="text-center">
+              <Loader2 className="w-12 h-12 text-primary animate-spin mx-auto mb-4" />
+              <p className="text-muted-foreground">Searching for "{searchQuery}"...</p>
+            </div>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (error) {
+    return (
+      <Layout>
+        <div className="max-w-7xl mx-auto px-4 md:px-8 py-12">
+          <div className="text-center py-20">
+            <SearchIcon className="w-16 h-16 text-destructive mx-auto mb-4" />
+            <h2 className="text-xl font-semibold mb-2">Search failed</h2>
+            <p className="text-muted-foreground">
+              Unable to search for "{searchQuery}". Please try again.
+            </p>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  const results = data?.result || {};
+  const hasResults = Object.values(results).some(items => items && items.length > 0);
+
+  return (
+    <Layout>
+      <div className="max-w-7xl mx-auto px-4 md:px-8 py-8">
+        <div className="mb-8">
+          <h1 className="text-3xl md:text-4xl font-display font-bold mb-2 neon-text">
+            Search Results
+          </h1>
+          <p className="text-muted-foreground">
+            Results for "{searchQuery}"
+          </p>
+        </div>
+
+        {!hasResults ? (
+          <div className="text-center py-20">
+            <SearchIcon className="w-24 h-24 text-muted-foreground mx-auto mb-6 opacity-50" />
+            <h2 className="text-2xl font-display font-bold mb-4">No results found</h2>
+            <p className="text-muted-foreground">
+              Try different keywords or check your spelling
+            </p>
+          </div>
+        ) : (
+          <Tabs defaultValue="songs" className="space-y-8">
+            <TabsList className="grid w-full grid-cols-6 bg-card">
+              <TabsTrigger value="songs" className="flex items-center gap-2">
+                <Music className="w-4 h-4" />
+                <span className="hidden sm:inline">Songs</span>
+                {results.songs && <span className="text-xs">({results.songs.length})</span>}
+              </TabsTrigger>
+              <TabsTrigger value="albums" className="flex items-center gap-2">
+                <Disc className="w-4 h-4" />
+                <span className="hidden sm:inline">Albums</span>
+                {results.albums && <span className="text-xs">({results.albums.length})</span>}
+              </TabsTrigger>
+              <TabsTrigger value="artists" className="flex items-center gap-2">
+                <Users className="w-4 h-4" />
+                <span className="hidden sm:inline">Artists</span>
+                {results.artists && <span className="text-xs">({results.artists.length})</span>}
+              </TabsTrigger>
+              <TabsTrigger value="playlists" className="flex items-center gap-2">
+                <Music className="w-4 h-4" />
+                <span className="hidden sm:inline">Playlists</span>
+                {results.playlists && <span className="text-xs">({results.playlists.length})</span>}
+              </TabsTrigger>
+              <TabsTrigger value="videos" className="flex items-center gap-2">
+                <Video className="w-4 h-4" />
+                <span className="hidden sm:inline">Videos</span>
+                {results.videos && <span className="text-xs">({results.videos.length})</span>}
+              </TabsTrigger>
+              <TabsTrigger value="podcasts" className="flex items-center gap-2">
+                <Mic className="w-4 h-4" />
+                <span className="hidden sm:inline">Podcasts</span>
+                {results.podcasts && <span className="text-xs">({results.podcasts.length})</span>}
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="songs">
+              {results.songs && results.songs.length > 0 ? (
+                <Card className="p-6">
+                  <TrackList tracks={results.songs} />
+                </Card>
+              ) : (
+                <div className="text-center py-12">
+                  <Music className="w-16 h-16 text-muted-foreground mx-auto mb-4 opacity-50" />
+                  <p className="text-muted-foreground">No songs found</p>
+                </div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="albums">
+              {results.albums && results.albums.length > 0 ? (
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                  {results.albums.map((album) => (
+                    <MediaCard key={album.id} item={album} />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <Disc className="w-16 h-16 text-muted-foreground mx-auto mb-4 opacity-50" />
+                  <p className="text-muted-foreground">No albums found</p>
+                </div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="artists">
+              {results.artists && results.artists.length > 0 ? (
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                  {results.artists.map((artist) => (
+                    <MediaCard key={artist.id} item={artist} />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <Users className="w-16 h-16 text-muted-foreground mx-auto mb-4 opacity-50" />
+                  <p className="text-muted-foreground">No artists found</p>
+                </div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="playlists">
+              {results.playlists && results.playlists.length > 0 ? (
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                  {results.playlists.map((playlist) => (
+                    <MediaCard key={playlist.id} item={playlist} />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <Music className="w-16 h-16 text-muted-foreground mx-auto mb-4 opacity-50" />
+                  <p className="text-muted-foreground">No playlists found</p>
+                </div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="videos">
+              {results.videos && results.videos.length > 0 ? (
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                  {results.videos.map((video) => (
+                    <MediaCard key={video.id} item={video} />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <Video className="w-16 h-16 text-muted-foreground mx-auto mb-4 opacity-50" />
+                  <p className="text-muted-foreground">No videos found</p>
+                </div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="podcasts">
+              {results.podcasts && results.podcasts.length > 0 ? (
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                  {results.podcasts.map((podcast) => (
+                    <MediaCard key={podcast.id} item={podcast} />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <Mic className="w-16 h-16 text-muted-foreground mx-auto mb-4 opacity-50" />
+                  <p className="text-muted-foreground">No podcasts found</p>
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
+        )}
+      </div>
+    </Layout>
+  );
+}
+
+# ========== client/src/pages/Downloads.tsx ==========
+import { Layout } from "@/components/Layout";
+import { Download, Music, Video, Podcast, Trash2, Play, Pause } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { useState, useEffect } from "react";
+import { usePlayerStore } from "@/lib/playerStore";
+import { CurrentMedia } from "@shared/schema";
+
+interface DownloadedItem {
+  id: string;
+  title: string;
+  artist?: string;
+  type: 'song' | 'video' | 'podcast';
+  downloadedAt: string;
+  fileSize?: string;
+  localPath?: string;
+  originalMedia: CurrentMedia;
+}
+
+export default function Downloads() {
+  const [downloads, setDownloads] = useState<DownloadedItem[]>([]);
+  const { currentMedia, isPlaying, setCurrentMedia, togglePlay } = usePlayerStore();
+
+  useEffect(() => {
+    // Load downloads from localStorage
+    const savedDownloads = localStorage.getItem('behimelobot_downloads');
+    if (savedDownloads) {
+      try {
+        setDownloads(JSON.parse(savedDownloads));
+      } catch (error) {
+        console.error('Failed to parse downloads from localStorage:', error);
+      }
+    }
+  }, []);
+
+  const handlePlay = (item: DownloadedItem) => {
+    if (currentMedia?.id === item.id) {
+      togglePlay();
+    } else {
+      setCurrentMedia(item.originalMedia);
+    }
+  };
+
+  const handleDelete = (id: string) => {
+    const updatedDownloads = downloads.filter(item => item.id !== id);
+    setDownloads(updatedDownloads);
+    localStorage.setItem('behimelobot_downloads', JSON.stringify(updatedDownloads));
+  };
+
+  const getIcon = (type: string) => {
+    switch (type) {
+      case 'video':
+        return Video;
+      case 'podcast':
+        return Podcast;
+      default:
+        return Music;
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  return (
+    <Layout>
+      <div className="max-w-7xl mx-auto px-4 md:px-8 py-8">
+        <div className="mb-8">
+          <div className="flex items-center gap-3 mb-4">
+            <Download className="w-8 h-8 text-primary neon-glow-sm" />
+            <h1 className="font-display text-4xl md:text-5xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent neon-text">
+              Downloads
+            </h1>
+          </div>
+          <p className="text-muted-foreground text-lg">
+            Your downloaded music, videos, and podcasts
+          </p>
+        </div>
+
+        {downloads.length === 0 ? (
+          <div className="text-center py-20">
+            <div className="gradient-bg rounded-2xl p-12 max-w-md mx-auto">
+              <Download className="w-24 h-24 text-muted-foreground mx-auto mb-6 opacity-50 floating-animation" />
+              <h2 className="text-2xl font-display font-bold mb-4 text-foreground">
+                No Downloads Yet
+              </h2>
+              <p className="text-muted-foreground mb-6">
+                Start downloading your favorite tracks to see them here
+              </p>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {downloads.map((item) => {
+              const IconComponent = getIcon(item.type);
+              const isCurrentlyPlaying = currentMedia?.id === item.id && isPlaying;
+              
+              return (
+                <Card key={item.id} className="p-4 hover:neon-glow-sm transition-all group">
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-4 flex-1 min-w-0">
+                      <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center flex-shrink-0">
+                        <IconComponent className="w-6 h-6 text-primary" />
+                      </div>
+                      
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-foreground truncate group-hover:neon-text transition-all">
+                          {item.title}
+                        </h3>
+                        {item.artist && (
+                          <p className="text-sm text-muted-foreground truncate">
+                            {item.artist}
+                          </p>
+                        )}
+                        <div className="flex items-center gap-4 mt-1 text-xs text-muted-foreground">
+                          <span>Downloaded {formatDate(item.downloadedAt)}</span>
+                          {item.fileSize && <span>{item.fileSize}</span>}
+                          <span className="capitalize">{item.type}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        onClick={() => handlePlay(item)}
+                        className="w-10 h-10 hover:neon-glow-sm transition-all"
+                        data-testid={`button-play-${item.id}`}
+                      >
+                        {isCurrentlyPlaying ? (
+                          <Pause className="w-5 h-5" />
+                        ) : (
+                          <Play className="w-5 h-5 fill-current ml-0.5" />
+                        )}
+                      </Button>
+                      
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        onClick={() => handleDelete(item.id)}
+                        className="w-10 h-10 text-destructive hover:text-destructive-foreground hover:bg-destructive transition-all"
+                        data-testid={`button-delete-${item.id}`}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </Card>
+              );
+            })}
+          </div>
+        )}
+
+        {downloads.length > 0 && (
+          <div className="mt-8 text-center">
+            <p className="text-sm text-muted-foreground">
+              {downloads.length} item{downloads.length !== 1 ? 's' : ''} downloaded
+            </p>
+          </div>
+        )}
+      </div>
+    </Layout>
+  );
+}
+
+# ========== client/src/pages/not-found.tsx ==========
+import { Layout } from "@/components/Layout";
+import { Music2, ArrowLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Link } from "wouter";
+
+export default function NotFound() {
+  return (
+    <Layout>
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="text-center max-w-md mx-auto px-4">
+          <div className="gradient-bg rounded-2xl p-12">
+            <Music2 className="w-24 h-24 text-primary mx-auto mb-6 floating-animation neon-glow-sm" />
+            <h1 className="text-6xl font-display font-bold mb-4 neon-text">404</h1>
+            <h2 className="text-2xl font-display font-bold mb-4 text-foreground">
+              Page Not Found
+            </h2>
+            <p className="text-muted-foreground mb-8">
+              The page you're looking for doesn't exist or has been moved.
+            </p>
+            <Link href="/">
+              <Button className="gap-2 neon-glow-sm">
+                <ArrowLeft className="w-4 h-4" />
+                Back to Home
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </div>
+    </Layout>
+  );
+}
+
+# ========================================
+# 📁 LIB FILES
+# ========================================
+
+# ========== client/src/lib/playerStore.ts ==========
+import { create } from 'zustand';
+import { CurrentMedia } from '@shared/schema';
+
+interface PlayerState {
+  currentMedia: CurrentMedia | null;
+  isPlaying: boolean;
+  volume: number;
+  setCurrentMedia: (media: CurrentMedia) => void;
+  togglePlay: () => void;
+  setVolume: (volume: number) => void;
+}
+
+export const usePlayerStore = create<PlayerState>((set) => ({
+  currentMedia: null,
+  isPlaying: false,
+  volume: 0.5,
+  setCurrentMedia: (media) => set({ currentMedia: media, isPlaying: true }),
+  togglePlay: () => set((state) => ({ isPlaying: !state.isPlaying })),
+  setVolume: (volume) => set({ volume }),
+}));
+
+# ========== client/src/lib/queryClient.ts ==========
+import { QueryClient, QueryFunction } from "@tanstack/react-query";
+
+async function throwIfResNotOk(res: Response) {
+  if (!res.ok) {
+    const text = (await res.text()) || res.statusText;
+    throw new Error(`${res.status}: ${text}`);
+  }
+}
+
+export async function apiRequest(
+  method: string,
+  url: string,
+  data?: unknown | undefined,
+): Promise<Response> {
+  const res = await fetch(url, {
+    method,
+    headers: data ? { "Content-Type": "application/json" } : {},
+    body: data ? JSON.stringify(data) : undefined,
+    credentials: "include",
+  });
+
+  await throwIfResNotOk(res);
+  return res;
+}
+
+type UnauthorizedBehavior = "returnNull" | "throw";
+export const getQueryFn: <T>(options: {
+  on401: UnauthorizedBehavior;
+}) => QueryFunction<T> =
+  ({ on401: unauthorizedBehavior }) =>
+  async ({ queryKey }) => {
+    const res = await fetch(queryKey.join("/") as string, {
+      credentials: "include",
+    });
+
+    if (unauthorizedBehavior === "returnNull" && res.status === 401) {
+      return null;
+    }
+
+    await throwIfResNotOk(res);
+    return await res.json();
+  };
+
+export const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      queryFn: getQueryFn({ on401: "throw" }),
+      refetchInterval: false,
+      refetchOnWindowFocus: false,
+      staleTime: 5 * 60 * 1000, // 5 minutes for music data
+      gcTime: 10 * 60 * 1000, // 10 minutes cache time
+      retry: 3,
+      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    },
+    mutations: {
+      retry: 2,
+      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
+    },
+  },
+});
+
+# ========== client/src/lib/utils.ts ==========
+import { type ClassValue, clsx } from "clsx"
+import { twMerge } from "tailwind-merge"
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs))
+}
+
+# ========== client/src/hooks/use-mobile.tsx ==========
+import * as React from "react"
+
+const MOBILE_BREAKPOINT = 768
+
+export function useIsMobile() {
+  const [isMobile, setIsMobile] = React.useState<boolean | undefined>(undefined)
+
+  React.useEffect(() => {
+    const mql = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`)
+    const onChange = () => {
+      setIsMobile(window.innerWidth < MOBILE_BREAKPOINT)
+    }
+    mql.addEventListener("change", onChange)
+    setIsMobile(window.innerWidth < MOBILE_BREAKPOINT)
+    return () => mql.removeEventListener("change", onChange)
+  }, [])
+
+  return !!isMobile
+}
+
+# ========== client/src/hooks/use-toast.ts ==========
+import * as React from "react"
+
+import type {
+  ToastActionElement,
+  ToastProps,
+} from "@/components/ui/toast"
+
+const TOAST_LIMIT = 1
+const TOAST_REMOVE_DELAY = 1000000
+
+type ToasterToast = ToastProps & {
+  id: string
+  title?: React.ReactNode
+  description?: React.ReactNode
+  action?: ToastActionElement
+}
+
+const actionTypes = {
+  ADD_TOAST: "ADD_TOAST",
+  UPDATE_TOAST: "UPDATE_TOAST",
+  DISMISS_TOAST: "DISMISS_TOAST",
+  REMOVE_TOAST: "REMOVE_TOAST",
+} as const
+
+let count = 0
+
+function genId() {
+  count = (count + 1) % Number.MAX_SAFE_INTEGER
+  return count.toString()
+}
+
+type ActionType = typeof actionTypes
+
+type Action =
+  | {
+      type: ActionType["ADD_TOAST"]
+      toast: ToasterToast
+    }
+  | {
+      type: ActionType["UPDATE_TOAST"]
+      toast: Partial<ToasterToast>
+    }
+  | {
+      type: ActionType["DISMISS_TOAST"]
+      toastId?: ToasterToast["id"]
+    }
+  | {
+      type: ActionType["REMOVE_TOAST"]
+      toastId?: ToasterToast["id"]
+    }
+
+interface State {
+  toasts: ToasterToast[]
+}
+
+const toastTimeouts = new Map<string, ReturnType<typeof setTimeout>>()
+
+const addToRemoveQueue = (toastId: string) => {
+  if (toastTimeouts.has(toastId)) {
+    return
+  }
+
+  const timeout = setTimeout(() => {
+    toastTimeouts.delete(toastId)
+    dispatch({
+      type: "REMOVE_TOAST",
+      toastId: toastId,
+    })
+  }, TOAST_REMOVE_DELAY)
+
+  toastTimeouts.set(toastId, timeout)
+}
+
+export const reducer = (state: State, action: Action): State => {
+  switch (action.type) {
+    case "ADD_TOAST":
+      return {
+        ...state,
+        toasts: [action.toast, ...state.toasts].slice(0, TOAST_LIMIT),
+      }
+
+    case "UPDATE_TOAST":
+      return {
+        ...state,
+        toasts: state.toasts.map((t) =>
+          t.id === action.toast.id ? { ...t, ...action.toast } : t
+        ),
+      }
+
+    case "DISMISS_TOAST": {
+      const { toastId } = action
+
+      // ! Side effects ! - This could be extracted into a dismissToast() action,
+      // but I'll keep it here for simplicity
+      if (toastId) {
+        addToRemoveQueue(toastId)
+      } else {
+        state.toasts.forEach((toast) => {
+          addToRemoveQueue(toast.id)
+        })
+      }
+
+      return {
+        ...state,
+        toasts: state.toasts.map((t) =>
+          t.id === toastId || toastId === undefined
+            ? {
+                ...t,
+                open: false,
+              }
+            : t
+        ),
+      }
+    }
+    case "REMOVE_TOAST":
+      if (action.toastId === undefined) {
+        return {
+          ...state,
+          toasts: [],
+        }
+      }
+      return {
+        ...state,
+        toasts: state.toasts.filter((t) => t.id !== action.toastId),
+      }
+  }
+}
+
+const listeners: Array<(state: State) => void> = []
+
+let memoryState: State = { toasts: [] }
+
+function dispatch(action: Action) {
+  memoryState = reducer(memoryState, action)
+  listeners.forEach((listener) => {
+    listener(memoryState)
+  })
+}
+
+type Toast = Omit<ToasterToast, "id">
+
+function toast({ ...props }: Toast) {
+  const id = genId()
+
+  const update = (props: ToasterToast) =>
+    dispatch({
+      type: "UPDATE_TOAST",
+      toast: { ...props, id },
+    })
+  const dismiss = () => dispatch({ type: "DISMISS_TOAST", toastId: id })
+
+  dispatch({
+    type: "ADD_TOAST",
+    toast: {
+      ...props,
+      id,
+      open: true,
+      onOpenChange: (open) => {
+        if (!open) dismiss()
+      },
+    },
+  })
+
+  return {
+    id: id,
+    dismiss,
+    update,
+  }
+}
+
+function useToast() {
+  const [state, setState] = React.useState<State>(memoryState)
+
+  React.useEffect(() => {
+    listeners.push(setState)
+    return () => {
+      const index = listeners.indexOf(setState)
+      if (index > -1) {
+        listeners.splice(index, 1)
+      }
+    }
+  }, [state])
+
+  return {
+    ...state,
+    toast,
+    dismiss: (toastId?: string) => dispatch({ type: "DISMISS_TOAST", toastId }),
+  }
+}
+
+export { useToast, toast }
